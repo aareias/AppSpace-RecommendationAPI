@@ -1,10 +1,10 @@
 ﻿using Domain;
 
-namespace TheMovieDbSource.Responses;
+namespace Application.Responses;
 
 public class GenresResponse
 {
-    public IEnumerable<Genre> Genres { get; set; }
+    public IEnumerable<Domain.Genre> Genres { get; set; }
     
     public int TotalCount => Genres?.Count() ?? 0;
 }

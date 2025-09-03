@@ -1,11 +1,17 @@
 @API_HostAddress = http://localhost:5217
 
-GET {{API_HostAddress}}/recommendations/genres/tv
+
+GET {{API_HostAddress}}/recommendations/billboard/intelligent?startDate=2025-08-30&endDate=2025-09-30&bigRooms=2&smallRooms=2
 Accept: application/json
 
 ###
 
-GET {{API_HostAddress}}/recommendations/genres/movie
+GET {{API_HostAddress}}/recommendations/cities
+Accept: application/json
+
+###
+
+GET {{API_HostAddress}}/recommendations/sessions
 Accept: application/json
 
 ###

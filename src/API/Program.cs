@@ -1,3 +1,5 @@
+using API.IoC;
+using SessionInformationDbSource.Configuration;
 using Shared;
 using TheMovieDbSource;
 
@@ -9,16 +11,13 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var tmdbBaseUrl = 
-        $"{builder.Configuration[TMDBApplicationConstants.TMDBBaseUrl]}/{builder.Configuration[TMDBApplicationConstants.TMDBApiVersion]}";
-
-builder.Services.AddHttpClient<TMDBClient>(o =>
-{
-    o.BaseAddress = new Uri(tmdbBaseUrl);
-});
+builder.Services.AddHttpClient();
 
 ApplicationSettings.SetConfiguration(builder.Configuration);
 
+builder.Services.RegisterServices();
+
+builder.Services.AddRepositories();
 builder.Services.RegisterTMDBServices();
 
 var app = builder.Build();

@@ -1,6 +1,8 @@
-﻿namespace Domain;
+﻿using SessionInformationDbSource.Entities.Abstractions;
 
-public class City
+namespace SessionInformationDbSource.Entities;
+
+public class City : IEntity
 {
     public int Id { get; set; }
     

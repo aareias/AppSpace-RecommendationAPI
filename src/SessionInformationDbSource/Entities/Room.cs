@@ -1,6 +1,8 @@
-﻿namespace Domain;
+﻿using SessionInformationDbSource.Entities.Abstractions;
 
-public class Room
+namespace SessionInformationDbSource.Entities;
+
+public class Room : IEntity
 {
     public int Id { get; set; }
 
@@ -9,6 +11,6 @@ public class Room
     public string Size { get; set; }
 
     public int Seats { get; set; }
-
+    
     public Cinema Cinema { get; set; }
 }

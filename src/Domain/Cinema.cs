@@ -8,5 +8,5 @@ public class Cinema
     
     public DateTime OpenSince { get; set; }
     
-    public Room[] Rooms { get; set; }
+    public IEnumerable<Room> Rooms { get; set; }
 }

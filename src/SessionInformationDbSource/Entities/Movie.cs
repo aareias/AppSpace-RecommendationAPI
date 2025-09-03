@@ -1,10 +1,12 @@
-﻿namespace Domain;
+﻿using SessionInformationDbSource.Entities.Abstractions;
 
-public class Movie
+namespace SessionInformationDbSource.Entities;
+
+public class Movie : IEntity
 {
     public int Id { get; set; }
     
-    public string Title { get; set; }
+    public string OriginalTitle { get; set; }
     
     public DateTime ReleaseDate { get; set; }
     
