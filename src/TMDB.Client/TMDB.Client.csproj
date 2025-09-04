@@ -8,8 +8,12 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Utils\Utils.csproj" />
-      <ProjectReference Include="..\SessionsDB\SessionsDB.csproj" />
-      <ProjectReference Include="..\TMDB.Client\TMDB.Client.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="9.0.8" />
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.8" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
     </ItemGroup>
 
 </Project>

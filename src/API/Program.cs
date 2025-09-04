@@ -1,7 +1,7 @@
 using API.IoC;
-using SessionInformationDbSource.Configuration;
-using Shared;
-using TheMovieDbSource;
+using SessionsDB.Configuration;
+using Utils;
+using TMDB.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +17,10 @@ ApplicationSettings.SetConfiguration(builder.Configuration);
 
 builder.Services.RegisterServices();
 
-builder.Services.AddRepositories();
+// Register SessionsDB repositories
+builder.Services.AddSessionsDBRepositories();
+
+// Register TMDB services
 builder.Services.RegisterTMDBServices();
 
 var app = builder.Build();

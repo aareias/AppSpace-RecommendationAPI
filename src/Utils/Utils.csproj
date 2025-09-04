@@ -7,9 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Utils\Utils.csproj" />
-      <ProjectReference Include="..\SessionsDB\SessionsDB.csproj" />
-      <ProjectReference Include="..\TMDB.Client\TMDB.Client.csproj" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.8" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.8" />
     </ItemGroup>
 
 </Project>
