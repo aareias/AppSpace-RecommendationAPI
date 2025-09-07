@@ -1,104 +1,133 @@
-﻿using System.Globalization;
-using Application.Configuration;
+﻿using Application.Configuration;
 using Application.Requests;
 using Application.Responses;
 using SessionsDB.Repositories.Abstractions;
-using TMDB;
-using TMDB.Responses;
+using TMDB.Client;
+using TMDB.Client.Requests;
+using TMDB.Client.Responses;
 using Utils;
 
 namespace Application;
 
 public class BillboardService(
-    ITmdbClient TmdbClient,
-    IMovieRepository MovieRepository) : IBillboardService
+    ITmdbClient tmdbClient,
+    IMovieRepository movieRepository) : IBillboardService
 {
     // List of genres typically associated with blockbuster movies
     static readonly string[] _standardBlockbusterGenres = ApplicationSettings.GetArrayValue(ApplicationConstants.BlockbusterGenres);
 
     static readonly int _maxSuccessfulMovies = ApplicationSettings.GetValue<int>(ApplicationConstants.MaxSuccessfulMovies);
 
-    public async Task<BillboardResponse> GetIntelligentBillboard(GetBillboardRequest request, CancellationToken cancellationToken)
+    public async Task<BillboardResponse> GetIntelligentBillboard(
+        GetIntelligentBillboardRequest request,
+        CancellationToken cancellationToken)
     {
-        var weeks = GetWeeks(request.StartDate, request.EndDate);
+        var weeks = GetWeeks(request.StartDate, request.EndDate).ToList();
 
-        var genresResponse = await TmdbClient.GetMovieGenresAsync(cancellationToken);
+        var genresResponse = await tmdbClient.GetMovieGenresAsync(cancellationToken);
 
-        List<int> blockbusterGenreIds = new List<int>();
+        List<int> blockbusterGenreIds;
 
         if (request.FilterByMostSuccessful)
         {
-            var popularMovies = await MovieRepository.GetMostSuccessfulMoviesAsync();
+            var popularMovies = await movieRepository.GetMostSuccessfulMoviesAsync();
 
             blockbusterGenreIds = genresResponse.Genres.Where(g => popularMovies
                 .Take(_maxSuccessfulMovies)
-                .SelectMany(m => m.Genres.Select(g => g.Name)).Distinct().Contains(g.Name)).Select(g => g.Id).ToList();
+                .SelectMany(m => m.Genres.Select(g => g.Name))
+                .Distinct().Contains(g.Name))
+                .Select(g => g.Id)
+                .ToList();
         }
         else
         {
-            blockbusterGenreIds = genresResponse.Genres.Where(g => _standardBlockbusterGenres.Contains(g.Name)).Select(g => g.Id).ToList();
+            blockbusterGenreIds = genresResponse.Genres
+                .Where(g => _standardBlockbusterGenres.Contains(g.Name))
+                .Select(g => g.Id)
+                .ToList();
         }
 
-        var blockbusterGenreMovies = await TmdbClient.GetMoviesAsync(new GetMoviesRequest
+        var blockbusterGenreMovies = await tmdbClient.GetMoviesAsync(new GetMoviesRequest
         {
             WithGenres = blockbusterGenreIds,
-            WantedMovies = request.BigRooms * weeks.Count(),
-            ReleaseDateBeforeThan = request.StartDate
+            WantedMovies = request.BigRooms * weeks.Count
         }, cancellationToken);
 
-        var minorityGenreMovies = await TmdbClient.GetMoviesAsync(new GetMoviesRequest
+        var minorityGenreMovies = await tmdbClient.GetMoviesAsync(new GetMoviesRequest
         {
             WithoutGenres = blockbusterGenreIds,
-            WantedMovies = request.SmallRooms * weeks.Count(),
-            ReleaseDateBeforeThan = request.StartDate
+            WantedMovies = request.SmallRooms * weeks.Count
         }, cancellationToken);
 
-        return GenerateBillBoard(blockbusterGenreMovies, minorityGenreMovies, genresResponse, weeks, request.BigRooms, request.SmallRooms);
+        return GenerateBillBoard(
+            blockbusterGenreMovies.ToList(), 
+            minorityGenreMovies.ToList(), 
+            genresResponse, 
+            weeks, 
+            request.BigRooms, 
+            request.SmallRooms);
     }
 
     #region Private methods
 
-    static BillboardResponse GenerateBillBoard(IEnumerable<TMDB.Responses.Movie> blockbusterMovies, IEnumerable<TMDB.Responses.Movie> minorityMovies, TMDB.Responses.GenresResponse genres, IEnumerable<Week> weeks, int bigRooms, int smallRooms)
+    static BillboardResponse GenerateBillBoard(
+        IEnumerable<MovieResponse> blockbusterMovies, 
+        IEnumerable<MovieResponse> minorityMovies, 
+        GenresResponse genres, 
+        List<Week> weeks, 
+        int bigRooms, 
+        int smallRooms)
     {
         var billboard = new BillboardResponse();
 
-        for (int i = 0; i < weeks.Count(); i++)
+        foreach (var week in weeks)
         {
-            var week = weeks.ElementAt(i);
-        
-            var bigRoomMovies = blockbusterMovies.Skip(i * bigRooms).Take(bigRooms);
-            var smallRoomMovies = minorityMovies.Skip(i * smallRooms).Take(smallRooms);
+            var bigRoomMovies = blockbusterMovies
+                .Where(x => x.ReleaseDate <= week.StartDate)
+                .Take(bigRooms)
+                .ToList();
+            
+            blockbusterMovies = blockbusterMovies.Except(bigRoomMovies);
+            
+            var smallRoomMovies = minorityMovies
+                .Where(x => x.ReleaseDate <= week.StartDate)
+                .Take(smallRooms)
+                .ToList();
+            
+            minorityMovies = minorityMovies.Except(smallRoomMovies);
 
             billboard.WeekPlan.Add(new WeekPlan
             {
                 StartDate = week.StartDate,
                 EndDate = week.EndDate,
-                ScreenMovies = bigRoomMovies.Select(m => new ScreenMovie
-                {
-                    IsBigRoom = true,
-                    Movie = new Responses.Movie
+                ScreenMovies = bigRoomMovies
+                    .Select(m => new ScreenMovie
                     {
-                        Id = m.Id,
-                        Title = m.Title,
-                        ReleaseDate = m.ReleaseDate,
-                        OriginalLanguage = m.OriginalLanguage,
-                        Adult = m.Adult,
-                        Genres = m.GenreIds.Select(genre => new Genre { Id = genre, Name = genres.Genres.Single(g => g.Id == genre).Name }).ToArray()
-                    }
-                })
-                .Concat(smallRoomMovies.Select(m => new ScreenMovie
-                {
-                    IsBigRoom = false,
-                    Movie = new Responses.Movie
+                        IsBigRoom = true,
+                        Movie = new Movie
+                        {
+                            Id = m.Id,
+                            Title = m.Title,
+                            ReleaseDate = m.ReleaseDate,
+                            OriginalLanguage = m.OriginalLanguage,
+                            Adult = m.Adult,
+                            Genres = m.GenreIds.Select(genre => new Genre { Id = genre, Name = genres.Genres.Single(g => g.Id == genre).Name }).ToArray()
+                        }
+                    })
+                .Concat(smallRoomMovies
+                    .Select(m => new ScreenMovie
                     {
-                        Id = m.Id,
-                        Title = m.Title,
-                        ReleaseDate = m.ReleaseDate,
-                        OriginalLanguage = m.OriginalLanguage,
-                        Adult = m.Adult,
-                        Genres = m.GenreIds.Select(gid => new Genre { Id = gid, Name = genres.Genres.Single(g => g.Id == gid).Name }).ToArray()
-                    }
-                }))
+                        IsBigRoom = false,
+                        Movie = new Movie
+                        {
+                            Id = m.Id,
+                            Title = m.Title,
+                            ReleaseDate = m.ReleaseDate,
+                            OriginalLanguage = m.OriginalLanguage,
+                            Adult = m.Adult,
+                            Genres = m.GenreIds.Select(gid => new Genre { Id = gid, Name = genres.Genres.Single(g => g.Id == gid).Name }).ToArray()
+                        }
+                    }))
             });
         }
 
@@ -108,24 +137,18 @@ public class BillboardService(
     // Assuming monday is the first day of the week
     static IEnumerable<Week> GetWeeks(DateTime startDate, DateTime endDate)
     {
-        var initialWeek = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(
-            startDate,
-            CalendarWeekRule.FirstDay,
-            DayOfWeek.Monday
-        );
+        startDate = startDate.DayOfWeek == DayOfWeek.Sunday ? startDate.AddDays(-6) : startDate.AddDays(DayOfWeek.Monday - startDate.DayOfWeek);
+        
+        var weekStart = startDate;
+        var weekEnd = weekStart;
 
-        var lastWeek = CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(
-            endDate,
-            CalendarWeekRule.FirstDay,
-            DayOfWeek.Monday
-        );
-
-        for (var week = initialWeek; week <= lastWeek; week++)
+        while (weekEnd < endDate)
         {
-            var weekStart = CultureInfo.CurrentCulture.Calendar.AddWeeks(startDate, week - initialWeek);
-            var weekEnd = weekStart.AddDays(6);
+            weekEnd = weekStart.AddDays(6);
             yield return new Week { StartDate = weekStart, EndDate = weekEnd };
-        }
+
+            weekStart = weekStart.AddDays(7);
+        };
     }
 
     #endregion

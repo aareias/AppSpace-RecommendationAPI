@@ -5,6 +5,8 @@ public class BillboardResponse
     public List<WeekPlan> WeekPlan { get; set; } = new List<WeekPlan>();
 
     public int TotalWeeks => WeekPlan.Count;
+
+    public int TotalMovies => WeekPlan.SelectMany(x => x.ScreenMovies).Count();
 }
 
 public class ScreenMovie

@@ -1,4 +1,4 @@
-namespace TMDB.Responses;
+namespace TMDB.Client.Requests;
 
 public class GetMoviesRequest
 {

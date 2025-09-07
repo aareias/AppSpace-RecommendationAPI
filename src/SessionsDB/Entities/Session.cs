@@ -1,8 +1,6 @@
-﻿using SessionsDB.Entities.Abstractions;
+﻿namespace SessionsDB.Entities;
 
-namespace SessionsDB.Entities;
-
-public class Session : IEntity
+public class Session
 {
     public int Id { get; set; }
     

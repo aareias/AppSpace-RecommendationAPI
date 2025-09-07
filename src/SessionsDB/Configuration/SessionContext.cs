@@ -1,26 +1,17 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SessionsDB.Entities;
-using Utils;
 
 namespace SessionsDB.Configuration;
 
 public class SessionContext(DbContextOptions<SessionContext> options) : DbContext(options)
 {
-    static string ConnectionString => ApplicationSettings.GetValue<string>(SessionInfoConstants.ConnectionString);
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlServer(ConnectionString);
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<Cinema>()
-            .HasOne<City>()
-            .WithMany(c => c.Cinemas)
-            .HasForeignKey(c => c.CityId);
+            .HasOne(ci => ci.City)
+            .WithMany(c => c.Cinemas);
         modelBuilder.Entity<City>();
         modelBuilder.Entity<Genre>()
             .HasMany(g => g.Movies)

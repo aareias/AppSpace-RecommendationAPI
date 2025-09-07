@@ -5,5 +5,5 @@ namespace Application;
 
 public interface IBillboardService
 {
-    Task<BillboardResponse> GetIntelligentBillboard(GetBillboardRequest request, CancellationToken cancellationToken);
+    Task<BillboardResponse> GetIntelligentBillboard(GetIntelligentBillboardRequest request, CancellationToken cancellationToken);
 }

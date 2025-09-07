@@ -1,12 +1,14 @@
 ﻿using System.Text.Json;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using Utils;
-using TMDB.Configurations;
-using TMDB.Responses;
+using TMDB.Client.Configurations;
+using TMDB.Client.Requests;
+using TMDB.Client.Responses;
 
-namespace TMDB;
+namespace TMDB.Client;
 
-public class TmdbClient(HttpClient client) : ITmdbClient
+public class TmdbClient(HttpClient client, ILogger<TmdbClient> logger) : ITmdbClient
 {
     readonly string _baseUrl = ApplicationSettings.GetValue<string>(TMDBApplicationConstants.TMDBBaseUrl);
     readonly string _apiVersion = ApplicationSettings.GetValue<string>(TMDBApplicationConstants.TMDBApiVersion);
@@ -19,56 +21,88 @@ public class TmdbClient(HttpClient client) : ITmdbClient
 
     public async Task<GenresResponse> GetMovieGenresAsync(CancellationToken ct)
     {
-        var query = new Dictionary<string, string?>
+        try
         {
-            ["api_key"] = _apiKey
-        };
+            var query = new Dictionary<string, string?>
+            {
+                ["api_key"] = _apiKey
+            };
 
-        var finalUri = QueryHelpers.AddQueryString($"{_baseUrl}/{_apiVersion}/genre/movie/list", query);
+            var finalUri = QueryHelpers.AddQueryString($"{_baseUrl}/{_apiVersion}/genre/movie/list", query);
 
-        var response = await client.GetStringAsync(finalUri, ct);
+            var response = await client.GetAsync(finalUri, ct);
+            
+            response.EnsureSuccessStatusCode();
 
-        var parsedResult = JsonSerializer.Deserialize<GenresResponse>(response, _options);
+            var stream = await response.Content.ReadAsStreamAsync(ct);
+    
+            var result = await JsonSerializer.DeserializeAsync<GenresResponse>(
+                stream,
+                _options,
+                ct
+            );
 
-        if (parsedResult == null)
-        {
-            throw new Exception("Failed to fetch genres from TMDB.");
+            if (result == null || !result.Genres.Any())
+            {
+                throw new InvalidDataException("Failed to deserialize response from TMDB.");
+            }
+
+            return result;
         }
-
-        return parsedResult;
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch movie genres from TMDB.");
+            throw;
+        }
     }
 
-    public async Task<IEnumerable<Movie>> GetMoviesAsync(GetMoviesRequest request, CancellationToken ct = default)
+    public async Task<IEnumerable<MovieResponse>> GetMoviesAsync(GetMoviesRequest request, CancellationToken ct = default)
     {
-        List<Movie> movieList = new();
+        List<MovieResponse> movieList = new();
 
         int totalPages = 1;
         int page = 1;
 
         var query = BuildDiscoverMovieQueryParameters(request);
 
-        while (movieList.Count < request.WantedMovies && page <= totalPages)
+        try
         {
-            query["page"] = page.ToString();
-
-            var finalUri = QueryHelpers.AddQueryString($"{_baseUrl}/{_apiVersion}/discover/movie", query);
-
-            var response = await client.GetStringAsync(finalUri, ct);
-
-            var result = JsonSerializer.Deserialize<DiscoverMoviesResponse>(response, _options);
-
-            if (result == null)
+            while (movieList.Count < request.WantedMovies && page <= totalPages)
             {
-                throw new Exception("Failed to fetch movies from TMDB.");
+                query["page"] = page.ToString();
+
+                var finalUri = QueryHelpers.AddQueryString($"{_baseUrl}/{_apiVersion}/discover/movie", query);
+
+                var response = await client.GetAsync(finalUri, ct);
+            
+                response.EnsureSuccessStatusCode();
+
+                var stream = await response.Content.ReadAsStreamAsync(ct);
+    
+                var result = await JsonSerializer.DeserializeAsync<DiscoverMoviesResponse>(
+                    stream,
+                    _options,
+                    ct
+                );
+
+                if (result == null || !result.Results.Any())
+                {
+                    throw new InvalidDataException("Failed to parse response from TMDB discover movie.");
+                }
+
+                movieList.AddRange(result.Results);
+
+                page++;
+                totalPages = result.TotalPages;
             }
 
-            movieList.AddRange(result.Results ?? Enumerable.Empty<Movie>());
-
-            page++;
-            totalPages = result.TotalPages;
+            return movieList.Take(request.WantedMovies);
         }
-
-        return movieList.Take(request.WantedMovies);
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to fetch movies from TMDB.");
+            throw;
+        }
     }
 
     Dictionary<string, string?> BuildDiscoverMovieQueryParameters(GetMoviesRequest request)
@@ -92,7 +126,7 @@ public class TmdbClient(HttpClient client) : ITmdbClient
 
         if (request.WithoutGenres != null && request.WithoutGenres.Any())
         {
-            query.Add("without_genres", string.Join(" OR ", request.WithoutGenres));
+            query.Add("without_genres", string.Join(" AND ", request.WithoutGenres));
         }
 
         return query;

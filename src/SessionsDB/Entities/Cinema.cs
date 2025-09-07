@@ -1,8 +1,6 @@
-﻿using SessionsDB.Entities.Abstractions;
+﻿namespace SessionsDB.Entities;
 
-namespace SessionsDB.Entities;
-
-public class Cinema : IEntity
+public class Cinema
 {
     public int Id { get; set; }
 
@@ -12,5 +10,5 @@ public class Cinema : IEntity
 
     public IEnumerable<Room> Rooms { get; set; }
     
-    public int CityId { get; set; }
+    public City City { get; set; }
 }

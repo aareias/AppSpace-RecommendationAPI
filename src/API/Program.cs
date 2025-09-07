@@ -1,7 +1,7 @@
 using API.IoC;
 using SessionsDB.Configuration;
+using TMDB.Client.Configurations;
 using Utils;
-using TMDB.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 

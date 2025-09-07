@@ -1,6 +1,4 @@
-﻿using TMDB.Client.Responses;
-
-namespace TMDB.Responses;
+﻿namespace TMDB.Client.Responses;
 
 public class GenresResponse
 {

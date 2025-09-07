@@ -1,0 +1,124 @@
+﻿{
+  "movies": [
+    {
+      "Id": 1,
+      "OriginalTitle": "Movie1",
+      "ReleaseDate": "2025/01/01",
+      "OriginalLanguage": "en",
+      "Adult": false,
+      "Genres": [
+        {
+          "Id": 4,
+          "Name": "Genre1"
+        }
+      ],
+      "Sessions": [
+        {
+          "Id": 1,
+          "StartTime": "2025/01/01",
+          "EndTime": "2025/01/01",
+          "SeatsSold": 10
+        },
+        {
+          "Id": 2,
+          "StartTime": "2025/01/01",
+          "EndTime": "2025/01/01",
+          "SeatsSold": 10
+        }
+      ]
+    },
+    {
+      "Id": 2,
+      "OriginalTitle": "Movie2",
+      "ReleaseDate": "2025/01/01",
+      "OriginalLanguage": "en",
+      "Adult": false,
+      "Genres": [
+        {
+          "Id": 5,
+          "Name": "Genre3"
+        },
+        {
+          "Id": 6,
+          "Name": "Genre4"
+        }
+      ],
+      "Sessions": [
+        {
+          "Id": 3,
+          "StartTime": "2025/01/01",
+          "EndTime": "2025/01/01",
+          "SeatsSold": 10
+        },
+        {
+          "Id": 4,
+          "StartTime": "2025/01/01",
+          "EndTime": "2025/01/01",
+          "SeatsSold": 11
+        }
+      ]
+    },
+    {
+      "Id": 3,
+      "OriginalTitle": "Movie3",
+      "ReleaseDate": "2025/01/01",
+      "OriginalLanguage": "en",
+      "Adult": false,
+      "Genres": [
+        {
+          "Id": 5,
+          "Name": "Genre5"
+        },
+        {
+          "Id": 6,
+          "Name": "Genre6"
+        }
+      ],
+      "Sessions": [
+        {
+          "Id": 5,
+          "StartTime": "2025/01/01",
+          "EndTime": "2025/01/01",
+          "SeatsSold": 9
+        },
+        {
+          "Id": 6,
+          "StartTime": "2025/01/01",
+          "EndTime": "2025/01/01",
+          "SeatsSold": 8
+        }
+      ]
+    },
+    {
+      "Id": 4,
+      "OriginalTitle": "Movie4",
+      "ReleaseDate": "2025/01/01",
+      "OriginalLanguage": "en",
+      "Adult": false,
+      "Genres": [
+        {
+          "Id": 1,
+          "Name": "Genre1"
+        },
+        {
+          "Id": 3,
+          "Name": "Genre3"
+        }
+      ],
+      "Sessions": [
+        {
+          "Id": 7,
+          "StartTime": "2025/01/01",
+          "EndTime": "2025/01/01",
+          "SeatsSold": 1
+        },
+        {
+          "Id": 8,
+          "StartTime": "2025/01/01",
+          "EndTime": "2025/01/01",
+          "SeatsSold": 1
+        }
+      ]
+    }
+  ]
+}

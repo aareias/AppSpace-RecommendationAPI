@@ -1,4 +1,4 @@
-﻿namespace TMDB.Configurations;
+﻿namespace TMDB.Client.Configurations;
 
 public static class TMDBApplicationConstants
 {

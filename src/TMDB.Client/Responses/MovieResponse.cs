@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace TMDB.Responses;
+namespace TMDB.Client.Responses;
 
-public class Movie
+public class MovieResponse
 {
     [JsonPropertyName("id")]
     public required int Id { get; set; }
