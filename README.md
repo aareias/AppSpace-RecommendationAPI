@@ -5,7 +5,7 @@ This repository contains the AppSpace Recommendation API, a .NET solution for re
 ## Features
 - RESTful API for recommendations and billboard generation
 - Modular architecture with separate projects for API, Application logic, Domain, Data sources and TMDB client integration
-- Unit and integration tests
+- Unit tests
 - GitHub Actions workflow for CI/CD
 
 ## Next Steps
