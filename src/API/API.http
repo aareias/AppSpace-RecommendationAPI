@@ -1,50 +1,11 @@
 @API_HostAddress = http://localhost:5217
 
-GET {{API_HostAddress}}/api/billboard/intelligent?startDate=2025-08-25&endDate=2026-09-25&bigRooms=2&smallRooms=2&filterByMostSuccessful=true
+GET {{API_HostAddress}}/api/billboard/intelligent?startDate=2025-08-25&endDate=2025-08-26&bigRooms=2&smallRooms=2&filterByMostSuccessful=true
 Accept: application/json
 
 ###
 
-GET {{API_HostAddress}}/api/billboard/intelligent?startDate=2025-08-30&endDate=2025-09-30&bigRooms=2&smallRooms=2&filterByMostSuccessful=false
+GET {{API_HostAddress}}/api/billboard/intelligent?startDate=2025-08-30&endDate=2026-08-31&bigRooms=2&smallRooms=2&filterByMostSuccessful=false
 Accept: application/json
 
-### 
-
-
-
-# API Definition for Exercise 1
-
-GET /api/recommendation/{tv or movie}/all-time?genres={genres}&keywords={keywords}
-
-GET /api/recommendation/{tv or movie}/upcoming?genres={genres}&keywords={keywords}&since={since}
-
-GET /api/recommendation/movie/upcoming?genres={genres}&since={since}&age-rate={age-rate}
-
-GET /api/recommendation/documentaries/all-time?topics={topics}
-
-GET /api/billboard?weeks={weeks}&screens={screens}
-
-GET /api/billboard/intelligent?startDate={start-date}&endDate={end-date}&bigRooms={bigRooms}&smallRooms={smallRooms}&filterByMostSuccessful={bool}
-
-
-# Recommendation response
-{
-    "title": "string",
-    "overview": "string",
-    "genre": "string",
-    "language": "string",
-    "releaseDate": "2025-08-30",
-    "website": "string",
-
-    // if documentary
-    "topics": ["string"],
-
-    // if tv show or movie
-    "keywords": ["string"],
-
-    // if tv show
-    "seasons": 1,
-    "episodes": 10,
-    "concluded": true
-}
-
+###

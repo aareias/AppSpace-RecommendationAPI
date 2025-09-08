@@ -5,9 +5,8 @@
     <Platform Name="x86" />
   </Configurations>
   <Folder Name="/Tests/">
-    <Project Path="tests/API.IntegrationTests/API.IntegrationTests.csproj" />
-    <Project Path="tests/TMDB.Client.Tests/TMDB.Client.UnitTests.csproj" />
-    <Project Path="tests\Application.UnitTests\Application.UnitTests.csproj">
+    <Project Path="tests/TMDB.Client.UnitTests/TMDB.Client.UnitTests.csproj" />
+    <Project Path="tests/Application.UnitTests/Application.UnitTests.csproj">
       <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
       <Configuration Solution="Debug|x86" Project="Debug|Any CPU" />
       <Configuration Solution="Release|x64" Project="Release|Any CPU" />
