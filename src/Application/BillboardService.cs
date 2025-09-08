@@ -35,7 +35,8 @@ public class BillboardService(
             blockbusterGenreIds = genresResponse.Genres.Where(g => popularMovies
                 .Take(_maxSuccessfulMovies)
                 .SelectMany(m => m.Genres.Select(g => g.Name))
-                .Distinct().Contains(g.Name))
+                .Distinct()
+                .Contains(g.Name))
                 .Select(g => g.Id)
                 .ToList();
         }
@@ -44,19 +45,22 @@ public class BillboardService(
             blockbusterGenreIds = genresResponse.Genres
                 .Where(g => _standardBlockbusterGenres.Contains(g.Name))
                 .Select(g => g.Id)
+                .Distinct()
                 .ToList();
         }
 
         var blockbusterGenreMovies = await tmdbClient.GetMoviesAsync(new GetMoviesRequest
         {
             WithGenres = blockbusterGenreIds,
-            WantedMovies = request.BigRooms * weeks.Count
+            WantedMovies = request.BigRooms * weeks.Count,
+            ReleaseDateBeforeThan = request.EndDate
         }, cancellationToken);
 
         var minorityGenreMovies = await tmdbClient.GetMoviesAsync(new GetMoviesRequest
         {
             WithoutGenres = blockbusterGenreIds,
-            WantedMovies = request.SmallRooms * weeks.Count
+            WantedMovies = request.SmallRooms * weeks.Count,
+            ReleaseDateBeforeThan = request.EndDate
         }, cancellationToken);
 
         return GenerateBillBoard(
@@ -71,8 +75,8 @@ public class BillboardService(
     #region Private methods
 
     static BillboardResponse GenerateBillBoard(
-        IEnumerable<MovieResponse> blockbusterMovies, 
-        IEnumerable<MovieResponse> minorityMovies, 
+        List<MovieResponse> blockbusterMovies, 
+        List<MovieResponse> minorityMovies, 
         GenresResponse genres, 
         List<Week> weeks, 
         int bigRooms, 
@@ -87,14 +91,13 @@ public class BillboardService(
                 .Take(bigRooms)
                 .ToList();
             
-            blockbusterMovies = blockbusterMovies.Except(bigRoomMovies);
-            
             var smallRoomMovies = minorityMovies
                 .Where(x => x.ReleaseDate <= week.StartDate)
                 .Take(smallRooms)
                 .ToList();
-            
-            minorityMovies = minorityMovies.Except(smallRoomMovies);
+
+            blockbusterMovies.RemoveAll(m => bigRoomMovies.Any(b => b.Id == m.Id));
+            minorityMovies.RemoveAll(m => smallRoomMovies.Any(s => s.Id == m.Id));
 
             billboard.WeekPlan.Add(new WeekPlan
             {
@@ -138,7 +141,7 @@ public class BillboardService(
     static IEnumerable<Week> GetWeeks(DateTime startDate, DateTime endDate)
     {
         startDate = startDate.DayOfWeek == DayOfWeek.Sunday ? startDate.AddDays(-6) : startDate.AddDays(DayOfWeek.Monday - startDate.DayOfWeek);
-        
+
         var weekStart = startDate;
         var weekEnd = weekStart;
 
@@ -148,7 +151,8 @@ public class BillboardService(
             yield return new Week { StartDate = weekStart, EndDate = weekEnd };
 
             weekStart = weekStart.AddDays(7);
-        };
+        }
+        ;
     }
 
     #endregion

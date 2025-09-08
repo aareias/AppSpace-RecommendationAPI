@@ -96,7 +96,7 @@ public class TmdbClient(HttpClient client, ILogger<TmdbClient> logger) : ITmdbCl
                 totalPages = result.TotalPages;
             }
 
-            return movieList.Take(request.WantedMovies);
+            return movieList;
         }
         catch (Exception ex)
         {
