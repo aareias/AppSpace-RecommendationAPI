@@ -2,9 +2,9 @@
 
 public class GetIntelligentBillboardRequest
 {
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-    public int BigRooms { get; set; }
-    public int SmallRooms { get; set; }
+    public required DateTime Since { get; set; }
+    public required DateTime Until { get; set; }
+    public required int BigRooms { get; set; }
+    public required int SmallRooms { get; set; }
     public bool FilterByMostSuccessful { get; set; }
 }

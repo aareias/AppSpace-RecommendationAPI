@@ -20,10 +20,26 @@ namespace API.Controllers
         {
             try
             {
+                if (request.Since >= request.Until)
+                {
+                    return TypedResults.BadRequest<ProblemDetails>(new()
+                    {
+                        Detail = "End date must be after start date."
+                    });
+                }
+
+                if (request.BigRooms < 1 && request.SmallRooms < 1)
+                {
+                    return TypedResults.BadRequest<ProblemDetails>(new()
+                    {
+                        Detail = "There must be at least one big room or one small room."
+                    });
+                }
+
                 var serviceRequest = new Application.Requests.GetIntelligentBillboardRequest()
                 {
-                    StartDate = request.StartDate,
-                    EndDate = request.EndDate,
+                    StartDate = request.Since,
+                    EndDate = request.Until,
                     BigRooms = request.BigRooms,
                     SmallRooms = request.SmallRooms,
                     FilterByMostSuccessful = request.FilterByMostSuccessful,
