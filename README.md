@@ -8,6 +8,13 @@ This repository contains the AppSpace Recommendation API, a .NET solution for re
 - Unit and integration tests
 - GitHub Actions workflow for CI/CD
 
+## Next Steps
+- API Rate limiting since we're providing a public API
+- Integration tests for the API project with in-memory DB and mocked TMDB API
+- Docker implementation which enhances horizontal scalability
+- Prepare full CI/CD pipeline using Github Actions
+- Improve logging and error handling
+
 ## API Definition for the Exercise
 See the full API specification in [API_Definition.md](API_Definition.md).
 
@@ -57,7 +64,7 @@ dotnet test AppSpace-RecommendationAPI.slnx --configuration Release
 ```
 
 ## API Usage
-See `src/API/API.http` for example requests.
+See [API.http](src/API/API.http) for example requests.
 
 ## CI/CD
 A GitHub Actions workflow builds and tests the solution on every merge to `master`. See `.github/workflows/build-and-test.yml`.
